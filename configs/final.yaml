@@ -1,0 +1,109 @@
+version: 1
+data_roots:
+  mots20: datasets/MOTSChallenge
+  kitti: datasets/KITTI
+detector:
+  weights: weights/yolo26x-seg.pt
+  tracker: configs/botsort.yaml
+  confidence: 0.12
+  iou: 0.65
+  image_size: 1280
+  retina_masks: true
+reid:
+  backbone: osnet_x1_0
+  batch_size: 32
+  crop_height: 256
+  crop_width: 128
+  mask_background: true
+  policy: budget_aware
+  event:
+    max_gap: 1
+    initial_samples: 3
+    refresh_interval: 6
+    top_k: 3
+    minimum_predicted_iou: 0.25
+    maximum_center_distance: 0.6
+    maximum_area_ratio: 1.8
+    overlap_iou: 0.3
+    ambiguity_min_score: 0.42
+    ambiguity_margin: 0.1
+    mask_weight: 0.15
+    mask_pre_margin: 0.18
+tracking:
+  max_age: 45
+  confirm_hits: 2
+  min_track_length: 1
+  high_confidence: 0.35
+  new_track_confidence: 0.35
+  low_appearance_gate: 0.45
+  low_max_cost: 0.8
+  appearance_gate: 0.58
+  lost_appearance_gate: 0.72
+  adjacent_max_cost: 0.76
+  lost_max_cost: 0.64
+  ema: 0.88
+  feature_management:
+    fresh_only: true
+    gallery_size: 24
+    prototype: fresh_mean
+    prototype_samples: 12
+    prototype_outlier_similarity: 0.35
+  ambiguity_split:
+    enabled: true
+    similarity_threshold: 0.58
+    minimum_track_length: 6
+    reasons:
+    - ambiguous_sparse_graph
+    - current_overlap
+    - reappearance
+    - missing_predecessor
+  global_max_gap: 90
+  global_min_similarity: 0.74
+  global_max_cost: 0.32
+  link_model: null
+  link_threshold: 0.89
+  link_mutual_margin: 0.0
+  link_high_confidence: 0.94
+  local_ranker:
+    enabled: true
+datasets:
+  mots20:
+    classes:
+      '2':
+        class_id: 2
+        osnet: weights/pedestrian/osnet.pth
+        resnet: weights/pedestrian/resnet_link.pt
+        ranker: weights/pedestrian/ranker.json
+        threshold: 0.8396047949790955
+        crop_h_w: [256, 128]
+        window: 2
+        camera_mode: none
+        mask_refinement: guard1
+    heldout:
+      '02': weights/mots20_heldout/02.pt
+      '05': weights/mots20_heldout/05.pt
+      '09': weights/mots20_heldout/09.pt
+      '11': weights/mots20_heldout/11.pt
+  kitti:
+    classes:
+      '1':
+        class_id: 1
+        osnet: weights/car/osnet.pth
+        resnet: weights/car/resnet_link.pt
+        ranker: weights/car/ranker.json
+        threshold: 0.9469640254974365
+        crop_h_w: [128, 256]
+        window: 2
+        camera_mode: background_lk
+        mask_refinement: close3
+      '2':
+        class_id: 2
+        osnet: weights/pedestrian/osnet.pth
+        resnet: weights/pedestrian/resnet_link.pt
+        ranker: weights/pedestrian/ranker.json
+        threshold: 0.8396047949790955
+        crop_h_w: [256, 128]
+        window: 2
+        camera_mode: none
+        mask_refinement: guard1
+
